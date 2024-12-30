@@ -1,0 +1,15 @@
+{
+    "name": "bollsjen/framework",
+    "description": "A simple PHP API framework",
+    "type": "project",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=7.4"
+    },
+    "minimum-stability": "stable"
+}

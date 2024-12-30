@@ -1,0 +1,28 @@
+# Root .htaccess
+# Deny access to all files by default
+Deny from all
+
+# Allow access only to index.php in root
+<Files index.php>
+    Allow from all
+</Files>
+
+# Protect sensitive directories
+RedirectMatch 403 ^/src/?$
+RedirectMatch 403 ^/vendor/?$
+RedirectMatch 403 ^/config/?$
+
+# Prevent viewing of .htaccess files
+<Files .htaccess>
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Disable directory listing
+Options -Indexes
+
+# Protect composer files
+<FilesMatch "composer\.(json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
