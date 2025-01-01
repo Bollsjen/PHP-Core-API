@@ -6,7 +6,8 @@ $app = new \App\Core\Application();
 
 // Register all controllers
 $app->registerControllers([
-    \App\Controllers\UsersController::class
+    \App\Controllers\UsersController::class,
+    \App\Controllers\AuthController::class
 ]);
 
 $app->run();

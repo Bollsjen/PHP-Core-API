@@ -7,6 +7,7 @@ use App\Core\Controller;
 class UsersController extends Controller {
     /**
      * @Route(path="/api/users", method="GET")
+     * @Auth
      */
     public function index($params) {
         $users = [
@@ -18,6 +19,7 @@ class UsersController extends Controller {
     
     /**
      * @Route(path="/api/users/{id}", method="GET")
+     * @Auth
      */
     public function get($params) {
         $id = $params['id'] ?? null;
@@ -29,6 +31,7 @@ class UsersController extends Controller {
     
     /**
      * @Route(path="/api/users", method="POST")
+     * @Auth
      */
     public function create($params) {
         $name = $params['name'] ?? null;
@@ -40,6 +43,7 @@ class UsersController extends Controller {
     
     /**
      * @Route(path="/api/users/{id}", method="PUT")
+     * @Auth
      */
     public function update($params) {
         $id = $params['id'] ?? null;
@@ -55,6 +59,7 @@ class UsersController extends Controller {
     
     /**
      * @Route(path="/api/users/{id}", method="DELETE")
+     * @Auth
      */
     public function delete($params) {
         $id = $params['id'] ?? null;

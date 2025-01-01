@@ -2,9 +2,55 @@
 
 namespace App\Core;
 
+use App\Core\Auth\Session;
+use App\Core\Attributes\{Route, Auth};
+
 class Router {
     private array $routes = [];
     private array $params = [];
+    private array $attributes = [];
+
+    public function registerAttribute(string $attributeClass) {
+        if (!in_array(Attributes\AttributeInterface::class, class_implements($attributeClass))) {
+            throw new \Exception("Attribute class must implement AttributeInterface");
+        }
+        $this->attributes[$attributeClass::getName()] = $attributeClass;
+    }
+
+    private function executeHandler(array $handler) {
+        [$controllerInstance, $method] = $handler;
+        
+        $reflection = new \ReflectionMethod($controllerInstance, $method);
+        $docComment = $reflection->getDocComment();
+
+        // Build middleware chain from attributes
+        $middlewareChain = function() use ($controllerInstance, $method) {
+            $requestData = $this->getRequestData();
+            $params = array_merge($this->params, $requestData);
+            $response = call_user_func_array([$controllerInstance, $method], [$params]);
+            
+            if ($response !== null) {
+                echo $response;
+            }
+        };
+
+        // Process each registered attribute
+        if ($docComment !== false) {
+            foreach ($this->attributes as $name => $attributeClass) {
+                $attributeData = $attributeClass::parse($docComment);
+                if ($attributeData !== null) {
+                    $attribute = new $attributeClass();
+                    $currentChain = $middlewareChain;
+                    $middlewareChain = function() use ($attribute, $attributeData, $currentChain) {
+                        return $attribute->process($attributeData, $currentChain);
+                    };
+                }
+            }
+        }
+
+        // Execute the chain
+        return $middlewareChain();
+    }
 
     public function registerControllers(array $controllers) {
         foreach ($controllers as $controller) {
@@ -21,7 +67,7 @@ class Router {
         foreach ($methods as $method) {
             $docComment = $method->getDocComment();
             if ($docComment) {
-                $routeParams = Attributes\Route::parseDocComment($docComment);
+                $routeParams = Route::parseDocComment($docComment);
                 if ($routeParams) {
                     $this->addRoute(
                         $routeParams['method'] ?? 'GET',
@@ -57,17 +103,6 @@ class Router {
         
         http_response_code(404);
         return json_encode(['error' => 'Route not found']);
-    }
-
-    private function executeHandler(array $handler) {
-        [$controllerInstance, $method] = $handler;
-        $requestData = $this->getRequestData();
-        $params = array_merge($this->params, $requestData);
-        $response = call_user_func_array([$controllerInstance, $method], [$params]);
-        
-        if ($response !== null) {
-            echo $response;
-        }
     }
 
     private function getRequestData(): array {
