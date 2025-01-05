@@ -4,9 +4,12 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 
+/**
+ * @BaseClass("/api/someting")
+ */
 class UsersController extends Controller {
     /**
-     * @Route(path="/api/users", method="GET")
+     * @Route(path="", method="GET")
      * @Auth
      */
     public function index($params) {
@@ -18,7 +21,7 @@ class UsersController extends Controller {
     }
     
     /**
-     * @Route(path="/api/users/{id}", method="GET")
+     * @Route(path="/{id}", method="GET")
      * @Auth
      */
     public function get($params) {
@@ -30,7 +33,7 @@ class UsersController extends Controller {
     }
     
     /**
-     * @Route(path="/api/users", method="POST")
+     * @Route(path="", method="POST")
      * @Auth
      */
     public function create($params) {
@@ -42,7 +45,7 @@ class UsersController extends Controller {
     }
     
     /**
-     * @Route(path="/api/users/{id}", method="PUT")
+     * @Route(path="/{id}", method="PUT")
      * @Auth
      */
     public function update($params) {
@@ -58,7 +61,7 @@ class UsersController extends Controller {
     }
     
     /**
-     * @Route(path="/api/users/{id}", method="DELETE")
+     * @Route(path="/{id}", method="DELETE")
      * @Auth
      */
     public function delete($params) {

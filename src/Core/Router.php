@@ -10,6 +10,10 @@ class Router {
     private array $params = [];
     private array $attributes = [];
 
+    public function getRoutes(): array {
+        return $this->routes;
+    }
+
     public function registerAttribute(string $attributeClass) {
         if (!in_array(Attributes\AttributeInterface::class, class_implements($attributeClass))) {
             throw new \Exception("Attribute class must implement AttributeInterface");
@@ -61,6 +65,9 @@ class Router {
     private function registerController($controllerClass) {
         $reflection = new \ReflectionClass($controllerClass);
         $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        // Get base path for controller
+        $basePath = $this->getControllerBasePath($reflection);
         
         $controllerInstance = new $controllerClass();
         
@@ -69,14 +76,44 @@ class Router {
             if ($docComment) {
                 $routeParams = Route::parseDocComment($docComment);
                 if ($routeParams) {
+                    // Combine base path with route path
+                    $fullPath = $this->combinePaths($basePath, $routeParams['path']);
+                    
                     $this->addRoute(
                         $routeParams['method'] ?? 'GET',
-                        $routeParams['path'],
+                        $fullPath,
                         [$controllerInstance, $method->getName()]
                     );
                 }
             }
         }
+    }
+
+    private function getControllerBasePath(\ReflectionClass $reflection): string {
+        // Check for @BasePath attribute
+        $docComment = $reflection->getDocComment();
+        if ($docComment && preg_match('/@BasePath\("([^"]+)"\)/', $docComment, $matches)) {
+            return $matches[1];
+        }
+
+        // Default base path: api/<controller-name>
+        $className = $reflection->getShortName();
+        $baseName = str_replace('Controller', '', $className);
+        return '/api/' . strtolower($baseName);
+    }
+
+    private function combinePaths(string $basePath, string $routePath): string {
+        $basePath = trim($basePath, '/');
+        $routePath = trim($routePath, '/');
+        
+        if (empty($basePath)) {
+            return '/' . $routePath;
+        }
+        if (empty($routePath)) {
+            return '/' . $basePath;
+        }
+        
+        return '/' . $basePath . '/' . $routePath;
     }
 
     public function addRoute(string $method, string $path, array $handler) {

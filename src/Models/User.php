@@ -18,10 +18,7 @@ class User {
         $this->email = $email;
         $this->data = $data;
 
-        if(count(self::$users) < 0)
-            self::$users = [
-                self::$nextId++ => new User('bollsjen', 'Nuster13', 'Magnus')
-            ];
+        $this->id = self::$nextId++;
     }
 
     // Save user to static array
